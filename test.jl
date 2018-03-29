@@ -3,6 +3,50 @@ include("DMM.jl")
 using Atom
 using DMM
 
+import Distributions:
+        UnivariateDistribution,
+        MultivariateDistribution,
+        Normal,
+        rand
+
+
+function generateSamples(::Type{T}, thetas::AbstractVector, numSamples::Array{Int64,1}; shuffled=true) where T <: UnivariateDistribution
+    @assert length(thetas) == length(numSamples)
+    M=length(thetas)
+    N=sum(numSamples)
+    data=zeros(Float64, N)
+    n=0
+    for i in 1:M
+        n_i=numSamples[i]
+        dist_i=T(thetas[i]...)
+        for j in 1:n_i
+            data[n+j]=rand(dist_i)
+        end
+        n+=n_i
+    end
+    if shuffled
+        shuffle!(data)
+    end
+    return data
+end
+
+params = [ (0, 1.5), (3, 1), (-2, 1)]
+data = generateSamples(Normal, params, [100, 100, 100])
+
+s=DMM.clusterUVN(data)
+
+#=
+function generateSamples(dist::MultivariateDistribution, thetas::AbstractArray, numSamples::Array{Int64,1}, d::Int64)
+    @assert size(thetas, 1) == length(numSamples)
+    M=size(thetas,1)
+    N=sum(numSamples)
+    data=zeros(Float64, N, d)
+    for i in 1:length(numSamples)
+
+    end
+end
+'''
+
 #Univariate test code
 '''
 gaussians = [(3.,3.), (-1.,0.5), (10,6)]
@@ -28,10 +72,10 @@ end
 U = ConjugatePriors.NormalGamma(μ0,n0,α0,β0)
 
 s = DMM.DPCluster(data,U,α)
-'''
+=#
 
 #Multivariate test code
-
+#=
 cv1 = [1. 0.;0. 1.]
 cv2 = [1. 0.5;0.5 1.]
 mu1 = [100.; 0.]
@@ -59,3 +103,4 @@ mu0=[0.;0.]
 
 U=ConjugatePriors.NormalWishart(mu0,kappa0,T0,nu0)
 s=DMM.DPCluster(data,U,α)
+=#
