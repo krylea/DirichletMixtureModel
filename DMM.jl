@@ -8,6 +8,8 @@ module DMM
         MultivariateDistribution,
         NormalCanon,
         Normal,
+        Gamma,
+        Exponential,
         MvNormal,
         MvNormalCanon,
         GenericMvTDist,
@@ -22,8 +24,9 @@ module DMM
         logpdf,
         posterior_canon
 
-    include("./Models/uv_normal.jl")
-    include("./Models/mv_normal.jl")
+    include("./models/uv_normal.jl")
+    include("./models/mv_normal.jl")
+    include("./models/uv_exp.jl")
     include("./DMMState.jl")
     include("./DPCluster.jl")
 end

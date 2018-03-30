@@ -6,6 +6,7 @@ using DMM
 import Distributions:
         UnivariateDistribution,
         MultivariateDistribution,
+        Exponential,
         Normal,
         rand
 
@@ -30,10 +31,12 @@ function generateSamples(::Type{T}, thetas::AbstractVector, numSamples::Array{In
     return data
 end
 
-params = [ (0, 1.5), (3, 1), (-2, 1)]
-data = generateSamples(Normal, params, [100, 100, 100])
+srand(101)
 
-s=DMM.clusterUVN(data)
+params = [(1.0), (5.0), (0.2)]
+data = generateSamples(Exponential, params, [100, 100, 100])
+
+s=DMM.clusterExp(data)
 
 #=
 function generateSamples(dist::MultivariateDistribution, thetas::AbstractArray, numSamples::Array{Int64,1}, d::Int64)
