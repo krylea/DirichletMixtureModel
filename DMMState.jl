@@ -92,7 +92,7 @@ function add!(state::DMMState, yi::Float64, ϕi::Array{Float64,1})
   end
 end
 
-function addnew!(state::DMMState, yi::Float64, ϕi::Tuple{Float64,Float64})
+function addnew!(state::DMMState, yi::Float64, ϕi::Tuple)
   i = 1
   K = keys(state.n)
   while i in K
@@ -108,7 +108,7 @@ end
 # Add new data to the state (when it is known that the data belongs to a new cluster)
 #
 
-function addnew!(state::DMMState, yi::Float64, ϕi::Tuple{Float64,Float64}, i::Int64)
+function addnew!(state::DMMState, yi::Float64, ϕi::Tuple, i::Int64)
   state.Y[i] = [yi]
   state.n[i] = 1
   state.ϕ[i] = ϕi

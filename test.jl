@@ -31,10 +31,10 @@ function generateSamples(::Type{T}, thetas::AbstractVector, numSamples::Array{In
     return data
 end
 
-srand(101)
+srand(1010)
 
-params = [(1.0), (5.0), (0.2)]
-data = generateSamples(Exponential, params, [100, 100, 100])
+params = [(10.0), (0.1)]
+data = generateSamples(Exponential, params, [100, 100])
 
 s=DMM.clusterExp(data)
 
