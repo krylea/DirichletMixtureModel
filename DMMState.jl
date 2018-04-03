@@ -10,22 +10,6 @@
 # from a Dirichlet Mixture Model (see DPCLuster.jl)
 #
 
-#
-# Check if two vectors are equal (within relative error ϵ)
-#
-function isequalϵ(a, b, ϵ=1e-6)
-  @assert length(a)==length(b)
-  if length(a)==1
-    return abs(a[1]-b[1])/min(a[1],b[1]) < ϵ
-  else
-    for i in length(a)
-      if abs(a[i]-b[i])/min(a[i],b[i]) >= ϵ
-        return false
-      end
-    end
-    return true
-  end
-end
 
 #
 # Stores the current state of the clusters in the Markov Chain.
@@ -43,7 +27,8 @@ end
 #
 
 function DMMState()
-  return DMMState(Dict{Int64,Tuple}(),Dict{Int64,Array{Float64}}(), Dict{Int64,Int64}())
+  return DMMState(Dict{Int64,Tuple}(),Dict{Int64,Array{Float64}}(),
+                    Dict{Int64,Int64}())
 end
 
 function DMMState(ϕ::Dict{Int64,Tuple}, n::Dict{Int64,Int64})
@@ -177,4 +162,34 @@ function cleanup!(state::DMMState)
       delete!(state.ϕ, k)
     end
   end
+end
+
+#
+# Check if two arrays (of same sizes) are equal (within relative error ϵ)
+#
+function isequalϵ(a::AbstractArray, b::AbstractArray, ϵ=1e-6)
+  @assert length(a)==length(b)
+  if length(a)==1
+    return abs(a[1]-b[1])/min(a[1],b[1]) < ϵ
+  else
+    for i in length(a)
+      if abs(a[i]-b[i])/min(a[i],b[i]) >= ϵ
+        return false
+      end
+    end
+    return true
+  end
+end
+
+#
+# Check if two tuples of arrays (of same sizes) are equal (within relative error ϵ)
+#
+function isequalϵ(a::Tuple, b::Tuple, ϵ=1e-6)
+    @assert length(a)==length(b)
+    for i in length(a)
+      if !isequalϵ(a[i], b[i], ϵ)
+        return false
+      end
+    end
+    return true
 end
