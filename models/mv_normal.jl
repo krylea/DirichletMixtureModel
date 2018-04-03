@@ -28,6 +28,18 @@ function marginal_likelihood(M::NormalWishart, y::Array{Float64,1})
   exp(d/2*log(π) + logmvgamma(d,nu/2) - logmvgamma(d,nu0/2) + nu/2*logdet(T0) - nu/2*logdet(Lam) + d/2 * (log(kappa0) - log(kappa)))
 end
 
+function clusterMVN(Y::Array{Float64,2};α::Float64=1.0, μ0::Array{Float64}=[], κ0::Float64=1.0, T0::Array{Float64,2}=[], ν0::Float64=NaN, iters::Int64=5000)
+  D=size(Y,2)
+  if isempty(μ0):
+    μ0 = zeros(1,D)
+  if isempty(T0):
+    T0 = eye(D)
+  if isnan(ν0):
+    ν0 = D
+  U = ConjugatePriors.NormalWishart(μ0,κ0,T0,ν0)
+  DMM.DPCluster(Y,U,α,iters=iters)
+end
+
 #I think this is wrong
 '''
 function marginal_likelihood(M::NormalWishart, y::Array{Float64,1})

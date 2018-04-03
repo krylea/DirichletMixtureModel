@@ -192,11 +192,11 @@ end
 # Check if two tuples of arrays (of same sizes) are equal (within relative error ϵ)
 #
 function isequalϵ(a::Tuple, b::Tuple, ϵ=1e-6)
-    @assert length(a)==length(b)
-    for i in length(a)
-      if !isequalϵ(a[i], b[i], ϵ)
-        return false
-      end
+  @assert length(a)==length(b)
+  for i in length(a)
+    if !isequalϵ(a[i], b[i], ϵ)
+      return false
     end
-    return true
+  end
+  return true
 end
