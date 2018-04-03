@@ -79,7 +79,19 @@ end
 # Add new data to the state (when the label is completely unknown)
 #
 
-function add!(state::DMMState, yi::Float64, ϕi::Array{Float64,1})
+function add!(state::DMMState, yi::Float64, ϕi::Tuple)
+  added=false
+  for (k,v) in state.Y
+    if isequalϵ(ϕi,state.ϕ[i])
+      addto!(state, yi, i)
+      added=true
+    end
+  end
+  if added == false
+    addnew!(state,yi,ϕi)
+  end
+end
+function add!(state::DMMState, yi::Array{Float64}, ϕi::Tuple)
   added=false
   for (k,v) in state.Y
     if isequalϵ(ϕi,state.ϕ[i])
@@ -99,6 +111,17 @@ function addnew!(state::DMMState, yi::Float64, ϕi::Tuple)
     i += 1
   end
   state.Y[i] = [yi]
+  state.n[i] = 1
+  state.ϕ[i] = ϕi
+  return i
+end
+function addnew!(state::DMMState, yi::Array{Float64}, ϕi::Tuple)
+  i = 1
+  K = keys(state.n)
+  while i in K
+    i += 1
+  end
+  state.Y[i] = reshape(yi, (1,length(yi)))
   state.n[i] = 1
   state.ϕ[i] = ϕi
   return i
