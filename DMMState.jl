@@ -164,9 +164,12 @@ function cleanup!(state::DMMState)
   end
 end
 
-
+#
+# Check if two numbers are equal (within relative error ϵ)
+#
 function isequalϵ(a::Number, b::Number, ϵ=1e-6)
   return abs(a-b)/min(a,b) < ϵ
+end
 
 #
 # Check if two arrays (of same sizes) are equal (within relative error ϵ)
