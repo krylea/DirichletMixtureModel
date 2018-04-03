@@ -43,14 +43,14 @@ end
 #
 
 function DMMState()
-  return DMMState(Dict{Int64,Array{Float64,1}}(),Dict{Int64,Tuple}(), Dict{Int64,Int64}())
+  return DMMState(Dict{Int64,Tuple}(),Dict{Int64,Array{Float64}}(), Dict{Int64,Int64}())
 end
 
 function DMMState(ϕ::Dict{Int64,Tuple}, n::Dict{Int64,Int64})
-  return DMMState(ϕ,Dict{Int64,Array{Float64,1}}(), n)
+  return DMMState(ϕ,Dict{Int64,Array{Float64}}(), n)
 end
 
-function DMMState(Y::Array{Float64,1}, model::Distribution)
+function DMMState(Y::Array{Float64,1}, model::UnivariateDistribution)
   N=length(Y)
   ϕ=Dict{Int64,Tuple}()
   Ynew=Dict{Int64,Array{Float64,1}}()
@@ -62,7 +62,7 @@ function DMMState(Y::Array{Float64,1}, model::Distribution)
   end
   return DMMState(ϕ,Ynew,n)
 end
-function DMMState(Y::Array{Float64,2}, model::Distribution)
+function DMMState(Y::Array{Float64,2}, model::MultivariateDistribution)
   N,d=size(Y)
   ϕ=Dict{Int64,Tuple{AbstractVector,AbstractMatrix}}()
   Ynew=Dict{Int64,Array{Float64,2}}()
@@ -128,7 +128,7 @@ function addnew!(state::DMMState, yi::Array{Float64}, ϕi::Tuple)
 end
 
 #
-# Add new data to the state (when it is known that the data belongs to a new cluster)
+# Add new data to the state (when it is known that the data belongs to a new cluster, and the desired label is known)
 #
 
 function addnew!(state::DMMState, yi::Float64, ϕi::Tuple, i::Int64)
@@ -136,9 +136,14 @@ function addnew!(state::DMMState, yi::Float64, ϕi::Tuple, i::Int64)
   state.n[i] = 1
   state.ϕ[i] = ϕi
 end
+function addnew!(state::DMMState, yi::Array{Float64}, ϕi::Tuple, i::Int64)
+  state.Y[i] = reshape(yi, (1,length(yi)))
+  state.n[i] = 1
+  state.ϕ[i] = ϕi
+end
 
 #
-# Add new data to the state (when the cluster label is known)
+# Add new data to the state (when the cluster label is known). ϕ is assumed to already be accurate.
 #
 
 function addto!(state::DMMState, yi::Float64, i::Int64)
@@ -149,6 +154,16 @@ function addto!(state::DMMState, yi::Float64, i::Int64)
     append!(state.Y[i], yi)
   else
     state.Y[i] = [yi]
+  end
+end
+function addto!(state::DMMState, yi::Array{Float64}, i::Int64)
+  @assert i in keys(state.ϕ)
+  @assert i in keys(state.n)
+  state.n[i]+=1
+  if i in keys(state.Y)
+    state.Y[i] = [state.Y[i]; yi]
+  else
+    state.Y[i] = reshape(yi, (1,length(yi)))
   end
 end
 
