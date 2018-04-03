@@ -167,13 +167,16 @@ end
 #
 # Check if two arrays (of same sizes) are equal (within relative error ϵ)
 #
+function isequalϵ(a::Number, b::Number, ϵ=1e-6)
+  return abs(a[1]-b[1])/min(a[1],b[1]) < ϵ
+
 function isequalϵ(a::AbstractArray, b::AbstractArray, ϵ=1e-6)
   @assert length(a)==length(b)
   if length(a)==1
-    return abs(a[1]-b[1])/min(a[1],b[1]) < ϵ
+    return isequalϵ(a[1], b[1], ϵ)
   else
     for i in length(a)
-      if abs(a[i]-b[i])/min(a[i],b[i]) >= ϵ
+      if !isequalϵ(a[i],b[i],ϵ)
         return false
       end
     end
