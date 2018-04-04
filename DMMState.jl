@@ -47,7 +47,7 @@ function DMMState(Y::Array{Float64,1}, model::UnivariateDistribution)
   end
   return DMMState(ϕ,Ynew,n)
 end
-function DMMState(Y::Array{Float64,2}, model::MultivariateDistribution)
+function DMMState(Y::Array{Float64,2}, model::Distribution)
   N,d=size(Y)
   ϕ=Dict{Int64,Tuple{AbstractVector,AbstractMatrix}}()
   Ynew=Dict{Int64,Array{Float64,2}}()

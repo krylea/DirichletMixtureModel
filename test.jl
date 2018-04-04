@@ -8,6 +8,7 @@ import Distributions:
         MultivariateDistribution,
         Exponential,
         Normal,
+        MvNormal,
         rand
 
 
@@ -30,25 +31,40 @@ function generateSamples(::Type{T}, thetas::AbstractVector, numSamples::Array{In
     end
     return data
 end
-
-srand(1010)
-
-params = [(10.0), (0.1)]
-data = generateSamples(Exponential, params, [100, 100])
-
-s=DMM.clusterExp(data)
-
-#=
-function generateSamples(dist::MultivariateDistribution, thetas::AbstractArray, numSamples::Array{Int64,1}, d::Int64)
-    @assert size(thetas, 1) == length(numSamples)
-    M=size(thetas,1)
+function generateSamples(::Type{T}, thetas::Tuple, numSamples::Array{Int64,1}, d::Int64; shuffled=true) where T <: MultivariateDistribution
+    @assert length(thetas) == length(numSamples)
+    M=length(thetas)
     N=sum(numSamples)
     data=zeros(Float64, N, d)
-    for i in 1:length(numSamples)
-
+    n=0
+    for i in 1:M
+        n_i=numSamples[i]
+        dist_i=T(thetas[i]...)
+        for j in 1:n_i
+            data[n+j,:]=rand(dist_i)
+        end
+        n+=n_i
     end
+    if shuffled
+        data=data[shuffle(1:end),:]
+    end
+    return data
 end
-'''
+
+srand(1010)
+T1 = [1. 0.; 0. 1.]
+T2 = [1. 0.5; 0.5 1.]
+μ1 = [10.,0.]
+μ2 = [0.,-10.]
+
+params = ((μ1, T1), (μ2, T2))
+data = generateSamples(MvNormal, params, [100, 100], 2)
+
+s=DMM.clusterMVN(data)
+
+#=
+
+
 
 #Univariate test code
 '''
