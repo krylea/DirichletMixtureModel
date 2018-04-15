@@ -35,7 +35,7 @@ function DMMState(ϕ::Dict{Int64,Tuple}, n::Dict{Int64,Int64})
   return DMMState(ϕ,Dict{Int64,Array{Float64}}(), n)
 end
 
-function DMMState(Y::Array{Float64,1}, model::UnivariateDistribution)
+function DMMState(Y::Array{Float64,1}, model::UnivariateMixtureModel)
   N=length(Y)
   ϕ=Dict{Int64,Tuple}()
   Ynew=Dict{Int64,Array{Float64,1}}()
@@ -47,14 +47,14 @@ function DMMState(Y::Array{Float64,1}, model::UnivariateDistribution)
   end
   return DMMState(ϕ,Ynew,n)
 end
-function DMMState(Y::Array{Float64,2}, model::Distribution)
-  N,d=size(Y)
+function DMMState(Y::Array{Float64,2}, model::MultivariateMixtureModel)
+  d,N=size(Y)
   ϕ=Dict{Int64,Tuple{AbstractVector,AbstractMatrix}}()
   Ynew=Dict{Int64,Array{Float64,2}}()
   n=Dict{Int64,Int64}()
   for i in 1:N
-    ϕ[i] = sample_posterior(model,Y[i,:])
-    Ynew[i] = reshape(Y[i,:],(1,d))
+    ϕ[i] = sample_posterior(model,Y[:,i:i])
+    Ynew[i] = Y[:, i:i]
     n[i] = 1
   end
   return DMMState(ϕ,Ynew,n)
@@ -76,7 +76,7 @@ function add!(state::DMMState, yi::Float64, ϕi::Tuple)
     addnew!(state,yi,ϕi)
   end
 end
-function add!(state::DMMState, yi::Array{Float64}, ϕi::Tuple)
+function add!(state::DMMState, yi::Array{Float64,2}, ϕi::Tuple)
   added=false
   for (k,v) in state.Y
     if isequalϵ(ϕi,state.ϕ[i])
@@ -100,13 +100,13 @@ function addnew!(state::DMMState, yi::Float64, ϕi::Tuple)
   state.ϕ[i] = ϕi
   return i
 end
-function addnew!(state::DMMState, yi::Array{Float64}, ϕi::Tuple)
+function addnew!(state::DMMState, yi::Array{Float64,2}, ϕi::Tuple)
   i = 1
   K = keys(state.n)
   while i in K
     i += 1
   end
-  state.Y[i] = reshape(yi, (1,length(yi)))
+  state.Y[i] = yi
   state.n[i] = 1
   state.ϕ[i] = ϕi
   return i
@@ -121,8 +121,8 @@ function addnew!(state::DMMState, yi::Float64, ϕi::Tuple, i::Int64)
   state.n[i] = 1
   state.ϕ[i] = ϕi
 end
-function addnew!(state::DMMState, yi::Array{Float64}, ϕi::Tuple, i::Int64)
-  state.Y[i] = reshape(yi, (1,length(yi)))
+function addnew!(state::DMMState, yi::Array{Float64,2}, ϕi::Tuple, i::Int64)
+  state.Y[i] = yi
   state.n[i] = 1
   state.ϕ[i] = ϕi
 end
@@ -141,14 +141,14 @@ function addto!(state::DMMState, yi::Float64, i::Int64)
     state.Y[i] = [yi]
   end
 end
-function addto!(state::DMMState, yi::Array{Float64}, i::Int64)
+function addto!(state::DMMState, yi::Array{Float64, 2}, i::Int64)
   @assert i in keys(state.ϕ)
   @assert i in keys(state.n)
   state.n[i]+=1
   if i in keys(state.Y)
-    state.Y[i] = [state.Y[i]; yi]
+    state.Y[i] = [state.Y[i] yi]
   else
-    state.Y[i] = reshape(yi, (1,length(yi)))
+    state.Y[i] = yi
   end
 end
 

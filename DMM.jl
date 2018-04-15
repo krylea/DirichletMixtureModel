@@ -1,6 +1,9 @@
 module DMM
     using Distributions
     using ConjugatePriors
+    using PDMats
+
+    import PDMats: PDMat
 
     import Distributions:
         Distribution,
@@ -8,11 +11,13 @@ module DMM
         MultivariateDistribution,
         NormalCanon,
         Normal,
+        NormalKnownSigma,
         Gamma,
         Exponential,
         MvNormal,
         MvNormalCanon,
         GenericMvTDist,
+        logmvgamma,
         suffstats,
         pdf
 
@@ -27,6 +32,7 @@ module DMM
     include("./models/uv_normal.jl")
     include("./models/mv_normal.jl")
     include("./models/uv_exp.jl")
+    include("./model.jl")
     include("./DMMState.jl")
     include("./DPCluster.jl")
 end

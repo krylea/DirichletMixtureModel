@@ -17,7 +17,7 @@
 # Clustering over class labels using Algorithm 2 from Neal(2000).
 #
 
-function DPCluster(Y::Array{Float64,1}, model::Distribution, α::Float64; iters::Int64=5000)
+function DPCluster(Y::Array{Float64,1}, model::UnivariateMixtureModel, α::Float64; iters::Int64=5000)
   # Initialize the clusters, returning c and phi
   state::DMMState = DMMState(Y,model)
 
@@ -34,12 +34,13 @@ function DPCluster(Y::Array{Float64,1}, model::Distribution, α::Float64; iters:
   return state
 end
 
-function DPCluster(Y::Array{Float64,2}, model::Distribution, α::Float64; iters::Int64=5000)
+function DPCluster(Y::Array{Float64,2}, model::MultivariateMixtureModel, α::Float64; iters::Int64=5000)
   # Initialize the clusters, returning c and phi
   state::DMMState = DMMState(Y,model)
 
   # Iterate
   for i in 1:iters
+		println(i)
     # Iterate through all Y and update
     state = sampleY(state,model,α)
 
@@ -56,7 +57,7 @@ end
 # Returns a new state object.
 #
 
-function sampleY(state::DMMState, model::Distribution, α::Float64)
+function sampleY(state::DMMState, model::UnivariateMixtureModel, α::Float64)
   N=sum(values(state.n))
   nextstate = DMMState(state.ϕ,state.n)
 
@@ -83,6 +84,48 @@ function sampleY(state::DMMState, model::Distribution, α::Float64)
             addto!(nextstate, y, K[i])
             break
           end
+        end
+      end
+    end
+  end
+  cleanup!(nextstate)
+  return nextstate
+end
+
+function sampleY(state::DMMState, model::MultivariateMixtureModel, α::Float64)
+  N=sum(values(state.n))
+  nextstate = DMMState(state.ϕ,state.n)
+
+  for k in keys(state.Y)
+    Yk = state.Y[k]
+    for j in size(Yk, 2)
+      yj = Yk[:,j:j]
+      nextstate.n[k] -= 1
+      K = collect(keys(nextstate.n))
+
+      q=[pdf_likelihood(model,yj[:,1],nextstate.ϕ[i])*nextstate.n[i]/(N-1+α) for i in K]
+      r=marginal_likelihood(model,yj)*α/(N-1+α)
+
+      b= 1/(r+sum(q))
+      r *= b
+      q *= b
+
+      rd=rand()
+      p=r
+      if rd < p
+        ϕk = sample_posterior(model,yj)
+        addnew!(nextstate, yj, ϕk)
+      else
+        for i in 1:length(K)
+          p += q[i]
+          if rd < p
+            addto!(nextstate, yj, K[i])
+            break
+          end
+					if i == length(K)
+						println(r)
+						println(q)
+					end
         end
       end
     end

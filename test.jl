@@ -12,7 +12,7 @@ import Distributions:
         rand
 
 
-function generateSamples(::Type{T}, thetas::AbstractVector, numSamples::Array{Int64,1}; shuffled=true) where T <: UnivariateDistribution
+function generateSamples(::Type{T}, thetas::Tuple, numSamples::Array{Int64,1}; shuffled=true) where T <: UnivariateDistribution
     @assert length(thetas) == length(numSamples)
     M=length(thetas)
     N=sum(numSamples)
@@ -35,36 +35,55 @@ function generateSamples(::Type{T}, thetas::Tuple, numSamples::Array{Int64,1}, d
     @assert length(thetas) == length(numSamples)
     M=length(thetas)
     N=sum(numSamples)
-    data=zeros(Float64, N, d)
+    data=zeros(Float64, d, N)
     n=0
     for i in 1:M
         n_i=numSamples[i]
         dist_i=T(thetas[i]...)
         for j in 1:n_i
-            data[n+j,:]=rand(dist_i)
+            data[:,n+j]=rand(dist_i)
         end
         n+=n_i
     end
     if shuffled
-        data=data[shuffle(1:end),:]
+        data=data[:,shuffle(1:end)]
     end
     return data
 end
 
 srand(1010)
+
+
+#   Multivariate Test Code
 T1 = [1. 0.; 0. 1.]
 T2 = [1. 0.5; 0.5 1.]
-μ1 = [10.,0.]
-μ2 = [0.,-10.]
+μ1 = [1.,0.]
+μ2 = [0.,-1.]
 
 params = ((μ1, T1), (μ2, T2))
 data = generateSamples(MvNormal, params, [100, 100], 2)
 
-s=DMM.clusterMVN(data)
+α=1.0
+
+D=size(data,1)
+U = DMM.MultivariateNormalModel(D)
+s=DMM.DPCluster(data,U,α)
+
 
 #=
+#   Univariate Test Code
+params = ((0.0,1.0), (5.0,2.0))
+data= generateSamples(Normal, params, [100,100])
+α=1.0
+
+U = DMM.UnivariateNormalModel()
+s=DMM.DPCluster(data,U,α)
+
+=#
 
 
+
+#=
 
 #Univariate test code
 '''
