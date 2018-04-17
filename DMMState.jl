@@ -35,7 +35,7 @@ function DMMState(ϕ::Dict{Int64,Tuple}, n::Dict{Int64,Int64})
   return DMMState(ϕ,Dict{Int64,Array{Float64}}(), n)
 end
 
-function DMMState(Y::Array{Float64,1}, model::UnivariateMixtureModel)
+function DMMState(Y::Array{Float64,1}, model::UnivariateConjugateModel)
   N=length(Y)
   ϕ=Dict{Int64,Tuple}()
   Ynew=Dict{Int64,Array{Float64,1}}()
@@ -47,7 +47,7 @@ function DMMState(Y::Array{Float64,1}, model::UnivariateMixtureModel)
   end
   return DMMState(ϕ,Ynew,n)
 end
-function DMMState(Y::Array{Float64,2}, model::MultivariateMixtureModel)
+function DMMState(Y::Array{Float64,2}, model::MultivariateConjugateModel)
   d,N=size(Y)
   ϕ=Dict{Int64,Tuple{AbstractVector,AbstractMatrix}}()
   Ynew=Dict{Int64,Array{Float64,2}}()

@@ -17,7 +17,7 @@
 # Clustering over class labels using Algorithm 2 from Neal(2000).
 #
 
-function DPCluster(Y::Array{Float64,1}, model::UnivariateMixtureModel, α::Float64; iters::Int64=5000)
+function DPCluster(Y::Array{Float64,1}, model::UnivariateConjugateModel, α::Float64; iters::Int64=5000)
   # Initialize the clusters, returning c and phi
   state::DMMState = DMMState(Y,model)
 
@@ -33,10 +33,7 @@ function DPCluster(Y::Array{Float64,1}, model::UnivariateMixtureModel, α::Float
   end
   return state
 end
-
-
-
-function DPCluster(Y::Array{Float64,2}, model::MultivariateMixtureModel, α::Float64; iters::Int64=5000)
+function DPCluster(Y::Array{Float64,2}, model::MultivariateConjugateModel, α::Float64; iters::Int64=5000)
   # Initialize the clusters, returning c and phi
   state::DMMState = DMMState(Y,model)
 
@@ -58,7 +55,7 @@ end
 # Returns a new state object.
 #
 
-function sampleY(state::DMMState, model::UnivariateMixtureModel, α::Float64)
+function sampleY(state::DMMState, model::UnivariateConjugateModel, α::Float64)
   N=sum(values(state.n))
   nextstate = DMMState(state.ϕ,state.n)
 
@@ -93,7 +90,7 @@ function sampleY(state::DMMState, model::UnivariateMixtureModel, α::Float64)
   return nextstate
 end
 
-function sampleY(state::DMMState, model::MultivariateMixtureModel, α::Float64)
+function sampleY(state::DMMState, model::MultivariateConjugateModel, α::Float64)
   N=sum(values(state.n))
   nextstate = DMMState(state.ϕ,state.n)
 
@@ -105,7 +102,7 @@ function sampleY(state::DMMState, model::MultivariateMixtureModel, α::Float64)
       K = collect(keys(nextstate.n))
 
       q=[pdf_likelihood(model,yj[:,1],nextstate.ϕ[i])*nextstate.n[i]/(N-1+α) for i in K]
-      r=marginal_likelihood(model,yj)*α/(N-1+α)
+      r=marginal_likelihood(model,yj[:,1])*α/(N-1+α)
 
       rbase = r
       qbase = q
@@ -117,7 +114,7 @@ function sampleY(state::DMMState, model::MultivariateMixtureModel, α::Float64)
       rd=rand()
       p=r
       if rd < p
-        ϕk = sample_posterior(model,yj)
+        ϕk = sample_posterior(model,yj[:,1])
         addnew!(nextstate, yj, ϕk)
       else
         for i in 1:length(K)

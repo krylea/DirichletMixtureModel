@@ -18,6 +18,7 @@ module DMM
         MvNormalCanon,
         GenericMvTDist,
         MvNormalStats,
+        NormalStats,
         logmvgamma,
         suffstats,
         pdf
@@ -30,10 +31,11 @@ module DMM
         logpdf,
         posterior_canon
 
+    include("./package_overrides.jl")
+    include("./model.jl")
     include("./models/uv_normal.jl")
     include("./models/mv_normal.jl")
     include("./models/uv_exp.jl")
-    include("./model.jl")
     include("./DMMState.jl")
     include("./DPCluster.jl")
 end
