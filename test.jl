@@ -9,10 +9,11 @@ import Distributions:
         Exponential,
         Normal,
         MvNormal,
-        rand
+        rand,
+        suffstats
 
 
-function generateSamples(::Type{T}, thetas::Tuple, numSamples::Array{Int64,1}; shuffled=true) where T <: UnivariateDistribution
+function generateSamples(::Type{T}, thetas::AbstractVector, numSamples::Array{Int64,1}; shuffled=true) where T <: UnivariateDistribution
     @assert length(thetas) == length(numSamples)
     M=length(thetas)
     N=sum(numSamples)
@@ -31,7 +32,7 @@ function generateSamples(::Type{T}, thetas::Tuple, numSamples::Array{Int64,1}; s
     end
     return data
 end
-function generateSamples(::Type{T}, thetas::Tuple, numSamples::Array{Int64,1}, d::Int64; shuffled=true) where T <: MultivariateDistribution
+function generateSamples(::Type{T}, thetas::AbstractVector, numSamples::Array{Int64,1}, d::Int64; shuffled=true) where T <: MultivariateDistribution
     @assert length(thetas) == length(numSamples)
     M=length(thetas)
     N=sum(numSamples)
@@ -59,14 +60,14 @@ T2 = [1. 0.5; 0.5 1.]
 μ1 = [5.,0.]
 μ2 = [0.,-5.]
 
-params = ((μ1, T1), (μ2, T2))
+params = [(μ1, T1), (μ2, T2)]
 data = generateSamples(MvNormal, params, [100, 100], 2)
 
 α=1.0
 
-D=size(data,1)
-U = DMM.MultivariateNormalModel(D)
-s = DMM.DPCluster(data,U,1.0)
+ss = suffstats(MvNormal, data)
+U = DMM.MultivariateNormalModel(ss)
+#s = DMM.DPCluster(data,U,1.0)
 
 #=
 

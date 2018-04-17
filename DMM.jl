@@ -17,6 +17,7 @@ module DMM
         MvNormal,
         MvNormalCanon,
         GenericMvTDist,
+        MvNormalStats,
         logmvgamma,
         suffstats,
         pdf
