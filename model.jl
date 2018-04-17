@@ -68,5 +68,5 @@ end
 
 #   Fallback
 function marginal_likelihood(D::Distribution, y::Union{Float64, Array{Float64,1}})
-    throw(MethodError("No marginal likelihood function provided."))
+    error("No marginal likelihood function provided.")
 end

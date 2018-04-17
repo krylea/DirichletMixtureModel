@@ -15,14 +15,15 @@ function MultivariateNormalModel(p::NormalWishart)
   MixtureModel(p, MvNormalCanon, canon_mvn)
 end
 function MultivariateNormalModel(d::Int64)
-  p=NormalWishart(zeros(d), 1.0, eye(d), d-1.0)
+  p=NormalWishart(zeros(d), 1.0, eye(d), d*1.0)
   MixtureModel(p, MvNormalCanon, canon_mvn)
 end
 function MultivariateNormalModel()
   d=2
-  p=NormalWishart(zeros(d), 1.0, eye(d), d-1.0)
+  p=NormalWishart(zeros(d), 1.0, eye(d), d*1.0)
   MixtureModel(p, MvNormalCanon, canon_mvn)
 end
+
 
 function canon_mvn(μ::Array{Float64, 1}, T::Array{Float64,2})
   (T*μ, T)

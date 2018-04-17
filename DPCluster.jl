@@ -34,13 +34,14 @@ function DPCluster(Y::Array{Float64,1}, model::UnivariateMixtureModel, α::Float
   return state
 end
 
+
+
 function DPCluster(Y::Array{Float64,2}, model::MultivariateMixtureModel, α::Float64; iters::Int64=5000)
   # Initialize the clusters, returning c and phi
   state::DMMState = DMMState(Y,model)
 
   # Iterate
   for i in 1:iters
-		println(i)
     # Iterate through all Y and update
     state = sampleY(state,model,α)
 
@@ -98,13 +99,16 @@ function sampleY(state::DMMState, model::MultivariateMixtureModel, α::Float64)
 
   for k in keys(state.Y)
     Yk = state.Y[k]
-    for j in size(Yk, 2)
+    for j in 1:size(Yk, 2)
       yj = Yk[:,j:j]
       nextstate.n[k] -= 1
       K = collect(keys(nextstate.n))
 
       q=[pdf_likelihood(model,yj[:,1],nextstate.ϕ[i])*nextstate.n[i]/(N-1+α) for i in K]
       r=marginal_likelihood(model,yj)*α/(N-1+α)
+
+      rbase = r
+      qbase = q
 
       b= 1/(r+sum(q))
       r *= b
@@ -122,10 +126,6 @@ function sampleY(state::DMMState, model::MultivariateMixtureModel, α::Float64)
             addto!(nextstate, yj, K[i])
             break
           end
-					if i == length(K)
-						println(r)
-						println(q)
-					end
         end
       end
     end
