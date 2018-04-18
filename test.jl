@@ -67,7 +67,7 @@ data = generateSamples(MvNormal, params, [100, 100], 2)
 
 ss = suffstats(MvNormal, data)
 U = DMM.MultivariateNormalModel(ss)
-#s = DMM.DPCluster(data,U,1.0)
+s = DMM.DPCluster(data,U,1.0)
 
 #=
 
